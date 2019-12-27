@@ -1,0 +1,86 @@
+@import './variables.scss';
+@import './iconfont.css';
+
+html,
+body {
+  background-color: $bgColor;
+  color: $defaultBlack;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.scroll-wrapper {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  overflow: hidden;
+
+  .swiper-container {
+    width: 100%;
+    height: inherit;
+
+    .swiper-pagination-bullets {
+      bottom: 0;
+
+      .swiper-pagination-bullet {
+        background-color: $defaultGray;
+        opacity: .6;
+        
+        &.swiper-pagination-bullet-active {
+          background-color: $mainColor;
+          opacity: 1;
+        }
+      }
+    }
+  }
+}
+
+.iconfont {
+  width: .32rem;
+  height: .32rem;
+  fill: currentColor;
+}
+
+.iconimage {
+  display: inline-block;
+  width: .32rem;
+  height: .32rem;
+  background-size: 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  &::after,
+  &::before {
+    content: '';
+  }
+
+  &.icon-volumn-1 {
+    background-image: url('../img/volume-1.png');
+  }
+  &.icon-volumn-2 {
+    background-image: url('../img/volume-2.png');
+  }
+  &.icon-volumn-mute {
+    background-image: url('../img/volume-mute.png');
+  }
+
+  &.icon-prev {
+    background-image: url('../img/prev.png');
+  }
+  &.icon-next {
+    background-image: url('../img/next.png');
+  }
+  &.icon-play {
+    background-image: url('../img/play.png');
+  }
+  &.icon-pause {
+    background-image: url('../img/pause.png');
+  }
+  &.icon-playing {
+    background-image: url('../img/playing.png');
+  }
+}
