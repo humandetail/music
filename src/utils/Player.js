@@ -3,6 +3,8 @@
  */
 import store from '@/store';
 
+import PlayModel from 'models/Play';
+
 import playHandle from '@/decorator/playHandle';
 
 @playHandle
@@ -13,6 +15,8 @@ class Player {
       return instance;
     }
     this.constructor.instance = this;
+
+    this.playModel = new PlayModel();
 
     this.init();
   }
@@ -42,6 +46,10 @@ class Player {
     return this.audio.paused;
   }
 
+  get readyState () {
+    return this.audio.readyState;
+  }
+
   get duration () {
     return this.audio.duration;
   }
@@ -63,8 +71,11 @@ class Player {
   }
 
   get buffered () {
-  //   console.log(this.audio.buffered.end)
-    return this.audio.buffered.end(0) || 0;
+    if (this.audio.buffered.length > 0) {
+      return this.audio.buffered.end(0)
+    } else {
+      return 0
+    }
   }
 
   get currentSrc () {
@@ -79,7 +90,7 @@ class Player {
   bindEvent () {
     this.audio.addEventListener('ended', this.handleEnded.bind(this), false);
     this.audio.addEventListener('error', this.handleError.bind(this), false);
-    this.audio.addEventListener('timeupdate', this.handleTimeupdate.bind(this), false);
+    // this.audio.addEventListener('timeupdate', this.handleTimeupdate.bind(this), false);
     this.audio.addEventListener('waiting', this.handleWaiting.bind(this), false);
   }
 
@@ -87,6 +98,7 @@ class Player {
   createPlayer () {
     if (!this.audio) {
       this.audio = new Audio();
+      this.audio.volume = store.state.userSettings.currentVolume;
       // document.body.appendChild(this.audio);
     }
   }
@@ -123,11 +135,7 @@ class Player {
         break;
     }
   }
-
-  handleTimeupdate () {
-    // console.log('缓冲区间', this.audio.buffered.end(0))
-  }
-
+  
   handleWaiting () {
     console.log('正在缓冲~')
   }
@@ -135,22 +143,36 @@ class Player {
   handleError (err) {
     console.log('音乐无法播放', err);
     // this.next();
-    this.play();
+    // this.play();
   }
 
   // 切换url
-  changeUrl (url) {
+  changeUrl (id) {
     return new Promise((resolve, reject) => {
-      this.audio.src = url;
-      this.audio.load();
+      // 获取音乐地址
+      this.playModel.getSongUrl(id)
+        .then((res) => {
+          let {
+            code,
+            data: [
+              { url }
+            ]
+          } = res;
 
-      let _self = this;
+          if (code !== 200 || !url) {
+            resolve(this.next());
+          } else {
+            this.audio.src = url;
+            this.audio.load();
 
-      function canplay () {
-        _self.audio.removeEventListener('canplay', canplay, false);
-        resolve();
-      }
-      this.audio.addEventListener('canplay', canplay, false);
+            let _self = this;
+            function canplay () {
+              _self.audio.removeEventListener('canplay', canplay, false);
+              resolve();
+            }
+            this.audio.addEventListener('canplay', canplay, false)
+          }
+        }).catch(reject);
     })
   }
 
@@ -168,7 +190,22 @@ class Player {
   }
 
   play () {
-    this.audio.play();
+    return new Promise((resolve, reject) => {
+      if (!this.currentSrc) {
+        let {
+          playListKind: current,
+          playList: list
+        } = store.state;
+        let id = list[current].id;
+        this.changeUrl(id).then(() => {
+          this.audio.play();
+          resolve();
+        }).catch(reject);
+      } else {
+        this.audio.play();
+        resolve();
+      }
+    });
   }
 
   pause () {
@@ -205,15 +242,11 @@ class Player {
     }
 
     store.commit('setPlayListKind', idx);
-    this.changeUrl(list[idx].url).then(() => {
-      this.play();
-    });
+    this.changeUrl(list[idx].id)
+      .then(() => {
+        this.play();
+      });
   }
-  // // 指定播放时间
-  // fastSeek (time) {
-  //   this.audio.currentTime = time;
-  //   this.play();
-  // }
 }
 
 export default Player;

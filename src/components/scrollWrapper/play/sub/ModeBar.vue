@@ -1,6 +1,6 @@
 <template>
   <div class="mode-bar">
-    <div class="btn">
+    <div class="btn" @click="toggleRegulator">
       <svg class="iconfont" aria-hidden="true">
         <use :xlink:href="`#${icon}`"></use>
       </svg>
@@ -17,6 +17,11 @@ export default {
       default () {
         return '';
       }
+    }
+  },
+  methods: {
+    toggleRegulator () {
+      this.$emit('toggleRegulator', true);
     }
   }
 }

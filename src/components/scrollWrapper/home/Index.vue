@@ -1,6 +1,7 @@
 <template>
   <main class="scroll-wrapper" ref="wrapper">
-    <div class="wrapper">
+    <loading :show="showLoading"/>
+    <div class="wrapper" v-if="!showLoading">
       <div class="content">
         <div class="banner">
           <common-swiper :info="banner"></common-swiper>
@@ -15,8 +16,6 @@
           <section-title :text="'推荐歌单'" :border="'border-bottom'" :moreLink="'/'"></section-title>
           <personalized-list :list="personalized"></personalized-list>
         </section>
-
-        <!-- <loading :show="true" /> -->
       </div>
     </div>
   </main>
@@ -46,34 +45,42 @@ export default {
     return {
       banner: [],
       topSong: [],
-      personalized: []
+      personalized: [],
+      showLoading: true
     }
   },
   methods: {
     getHomeDatas () {
+      this.showLoading = true;
       const indexModel = new IndexModel();
       
-      const getBannner = indexModel.getHomeBanner(2),
-            getTopSong = indexModel.getTopSong(0),
-            getPersonalized = indexModel.getPersonalized();
-
-      Promise.all([getBannner, getTopSong, getPersonalized])
-        .then(([banner, topSong, personalized]) => {
-          this.banner = banner.banners.slice(0, 5).map((item) => {
+      indexModel.getHomeBanner(2).then(({code, banners}) => {
+        if (code === 200) {
+          this.banner = banners.slice(0, 5).map((item) => {
             return {
               id: item.bannerId,
               img: item.pic,
               name: item.TypeTitle
             }
           });
-          this.topSong = topSong.data.slice(0, 10).map((item) => {
+        }
+      });
+
+      indexModel.getTopSong().then((res) => {
+        if (res.code === 200) {
+          this.topSong = res.result.slice(0, 10).map((item) => {
             return {
               id: item.id,
-              img: item.album.blurPicUrl,
+              img: item.picUrl,
               name: item.name
             }
           });
-          this.personalized = personalized.result.slice(0, 15).map((item) => {
+        }
+      });
+
+      indexModel.getPersonalized().then((res) => {
+        if (res.code === 200) {
+          this.personalized = res.result.slice(0, 15).map((item) => {
             return {
               id: item.id,
               name: item.name,
@@ -82,15 +89,18 @@ export default {
               playCount: (item.playCount / 10000).toFixed(1) + '万'
             }
           });
-        })
-        .catch((err) => {
-          console.log(err);
-        })
+        }
+      });
+      setTimeout(() => {
+        this.showLoading = false;
+        this.$nextTick(() => {
+          this.scroll = new BScroll(this.$refs.wrapper);
+        });
+      }, 300)
     }
   },
   mounted () {
     this.getHomeDatas();
-    this.scroll = new BScroll(this.$refs.wrapper);
   }
 }
 </script>

@@ -13,7 +13,7 @@ export default {
       timer: null,
       isShow: false,
       options: {
-        duration: 2000,
+        duration: 1000,
         text: '',
         icon: ''
       }

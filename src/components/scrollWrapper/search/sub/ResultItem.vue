@@ -87,12 +87,8 @@ export default {
       if (idx === -1) { // 当前列表中没有该数据，执行添加操作
         let info = this.info;
 
-        // 获取歌曲url
-        let url = await this.getSongUrl(id);
-
         addFn({
           id,
-          url,
           name: info.name.replace(utils.tagReg(), ''),
           artist: info.artist.replace(utils.tagReg(), ''),
         });
@@ -105,26 +101,6 @@ export default {
           text: '歌曲已存在~',
           icon: 'icon-warning'
         });
-      }
-    },
-
-    async getSongUrl (id) {
-      let [
-        {
-          code,
-          data: [
-            data
-          ]
-        },
-        {
-          success,
-          message
-        }
-      ] = await playModel.getSong(id);
-      if (success && message === 'ok' && code === 200) {
-        return data.url
-      } else {
-        return ''
       }
     }
   }

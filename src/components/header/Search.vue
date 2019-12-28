@@ -30,7 +30,9 @@ export default {
       this.$emit('changeKeyword', val);
     },
     handleCancel () {
-      this.$router.go(-1)
+      this.$router.push({
+        name: 'home'
+      })
     }
   }
 }

@@ -112,7 +112,9 @@ export default {
       }
       setTimeout(() => {
         this.showLoading = false;
-        this.scroll.refresh();
+        this.$nextTick(() => {
+          this.scroll = new BScroll(this.$refs.wrapper);
+        });
       }, 300);
     },
 
@@ -123,7 +125,6 @@ export default {
   },
   mounted () {
     this.getList();
-    this.scroll = new BScroll(this.$refs.wrapper);
   }
 }
 </script>

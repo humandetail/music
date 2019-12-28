@@ -19,7 +19,7 @@
           :data-id="info.id"
           :data-field="field"
           data-handle="play"
-          @click="handleClick"
+          @click.stop="handleClick"
         >
           <svg class="iconfont" aria-hidden="true">
             <use xlink:href="#icon-play"></use>
@@ -30,7 +30,7 @@
           :data-id="info.id"
           :data-field="field"
           data-handle="remove"
-          @click="handleClick"
+          @click.stop="handleClick"
         ></div>
       </div>
     </div>
@@ -63,7 +63,7 @@ export default {
     }
   },
   computed: {
-    ...mapState(['playList'])
+    ...mapState(['playListKind', 'playList'])
   },
   methods: {
     ...mapActions([
@@ -72,7 +72,7 @@ export default {
       'collectionListRemoveSong'
     ]),
     ...mapMutations([
-      'setPlayListCurrent'
+      'setPlayListKind'
     ]),
 
     handleClick (ev) {
@@ -99,51 +99,55 @@ export default {
     },
     // 播放当前音乐
     async handlePlay (id, field) {
+      let idx = -1;
+      if (field === 'collectionList') {
+        // 收藏列表点击的播放
+        // 先添加到播放列表
+        // let list = this.playList;
+        idx = await this.playList.findIndex((item) => item.id === id)
+
+        if (idx === -1) { // 播放列表没有当前音乐，先添加到播放列表
+          await this.playListAddSong(this.info);
+        }
+      }
+      idx = await this.playList.findIndex((item) => item.id === id)
+
+      if (idx == this.playListKind) {
+        this.audioPlayer.play();
+      } else {
+        await this.setPlayListKind(idx);
+        this.audioPlayer.changeUrl(id).then(() => {
+          this.audioPlayer.play();
+        });
+      }
+      
       if (this.$route.name !== 'play') {
         this.$router.push({
           name: 'play'
         });
       }
-      if (field === 'collectionList') {
-        // 收藏列表点击的播放
-        // 先添加到播放列表
-        let list = this.playList.list;
-        let idx = await list.findIndex((item) => item.id === id)
-        if (idx !== -1) {
-          // 当前播放列表并没有该音乐
-          // 执行添加操作
-          await this.playListAddSong(this.info);
-          await this.setPlayListCurrent(id);
-        }
-      }
-      let [
-        {
-          code,
-          data: [
-            data
-          ]
-        },
-        {
-          success,
-          message
-        }
-      ] = await playModel.getSong(id)
-      
-      if (!success || message !== 'ok') {
-        console.log(message); // 音乐地址不合法
-      } else if (code !== 200) {
-        console.log('音乐地址获取失败')
-      } else {
-        this.audioPlayer.changeUrl(data.url);
-      }
     },
 
     // 从列表中删除当前音乐
     handleRemove (id, field) {
-      console.log(id)
       switch (field) {
         case 'playList':
-          this.playListRemoveSong(id);
+          let idx = this.playList.findIndex((item) => item.id === id);
+          console.log(id, idx, this.playListKind)
+          this.playListRemoveSong(id)
+            .then(() => {
+              if (idx == this.playListKind) { // 删除的是当前正在播放的音乐
+                this.setPlayListKind(0);
+                if (!this.audioPlayer.paused) {
+                  // 播放状态
+                  this.audioPlayer.changeUrl(this.playList[0].id)
+                    .then(() => {
+                      this.audioPlayer.play();
+                    })
+                }
+              }
+            })
+          console.log(idx )
           break;
         case 'collectionList':
           this.collectionListRemoveSong(id);

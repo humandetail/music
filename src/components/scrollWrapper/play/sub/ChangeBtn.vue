@@ -1,6 +1,6 @@
 <template>
   <div class="change-btn" :class="mode">
-    <span class="icon iconimage" :class="`icon-${mode}`"></span>
+    <span class="icon iconimage" :class="`icon-${mode}`" @click="switchSong"></span>
   </div>
 </template>
 
@@ -9,6 +9,11 @@ export default {
   name: 'ChangeBtn',
   props: {
     mode: String
+  },
+  methods: {
+    switchSong () {
+      this.$emit('switchSong', this.mode)
+    }
   }
 }
 </script>

@@ -28,7 +28,7 @@ let userSettings = {
 }
 
 // 用户歌单
-let playListKind = -1, // 当前播放列表索引
+let playListKind = 0, // 当前播放列表索引
     playList = []; // 播放列表
 
 // 收藏歌单

@@ -7,15 +7,17 @@ export default (target) => {
    * @param { String } mode 当前的播放模式
    */
   target.getNextSong = (playList, current, mode) => {
+    if (playList.length === 1) {
+      return 0;
+    }
     if (mode === 'random') {
       let idx = getRandom(0, playList.length, current);
-      console.log(idx, current)
       return idx;
     } else {
       if (current === playList.length - 1) {
         return 0;
       } else {
-        return current + 1;
+        return Number(current) + 1;
       }
     }
   }
@@ -27,6 +29,9 @@ export default (target) => {
    * @param { String } mode 当前的播放模式
    */
   target.getPrevSong = (playList, current, mode) => {
+    if (playList.length === 1) {
+      return 0;
+    }
     if (mode === 'random') {
       let idx = getRandom(0, playList.length, current);
       return idx;

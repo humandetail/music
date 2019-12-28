@@ -13,5 +13,14 @@ module.exports = {
       .set('utils', resolve('src/utils'))
       .set('models', resolve('src/models'))
       .set('components', resolve('src/components'))
+  },
+  productionSourceMap: false,
+  configureWebpack: {
+    externals: {
+      vue: 'Vue',
+      'vue-router': 'VueRouter',
+      // 'vue-awesome-swiper': 'VueAwesomeSwiper',
+      'better-scroll': 'BScroll'
+    }
   }
 };

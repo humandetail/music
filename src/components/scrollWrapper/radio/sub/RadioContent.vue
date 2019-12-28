@@ -84,12 +84,16 @@ export default {
         let pos = {},
             getElementDocPosition = utils.getElementDocPosition;
         
-        
-        pos.start = getElementDocPosition(document.getElementById('mark-' + item.id)).top;
+        let oItem = document.getElementById('mark-' + item.id);
+
+
+        pos.start = oItem ? getElementDocPosition(oItem).top : 0;
         if (!arr[idx + 1]) {
-          pos.end = pos.start + utils.getStyles(document.getElementById('mark-' + item.id), 'height');
+          pos.end = pos.start + (oItem ? utils.getStyles(oItem, 'height') : 0);
         } else {
-          pos.end = getElementDocPosition(document.getElementById('mark-' + arr[idx + 1].id)).top;
+          let oItemNext = document.getElementById('mark-' + arr[idx + 1].id);
+
+          pos.end = oItemNext ? getElementDocPosition(oItemNext).top : 0;
         }
         return pos;
       });

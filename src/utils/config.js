@@ -1,11 +1,12 @@
-const API_BASE_URL = 'http://localhost:3000';
-// const API_BASE_URL = 'http://musicapi.humandetail.com';
+// const API_BASE_URL = 'http://localhost:3000';
+const API_BASE_URL = 'http://musicapi.humandetail.com';
 
 const API = {
   // 首页BANNER
   GET_HOME_BANNER: API_BASE_URL + '/banner',
   // 新歌速递
-  GET_TOP_SONG: API_BASE_URL + '/top/song',
+  // GET_TOP_SONG: API_BASE_URL + '/top/song',
+  GET_TOP_SONG: API_BASE_URL + '/personalized/newsong',
   // 推荐歌单
   GET_PERSONALIZED: API_BASE_URL + '/personalized',
   // 音乐URL

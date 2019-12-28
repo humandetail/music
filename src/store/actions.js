@@ -13,7 +13,10 @@ export default {
   },
   // 删除歌曲列表中的歌曲
   playListRemoveSong ({commit}, id) {
-    commit('playListRemoveSong', id);
+    return new Promise((resolve, reject) => {
+      commit('playListRemoveSong', id);
+      resolve();
+    });
   },
   
   // 添加新歌曲到收藏列表

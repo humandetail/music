@@ -69,6 +69,7 @@ export default {
   mounted () {
     this.scroll = new BScroll(this.$refs.wrapper, {
       stopPropagation: true,
+      click: true
     });
   }
 }

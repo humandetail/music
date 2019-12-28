@@ -1,7 +1,12 @@
 <template>
   <div class="lyric-wrapper">
     <div class="no-lyric" v-if="lyric.length <= 0">暂无歌词</div>
-    <div class="lyric-list" ref="list" v-else>
+    <div
+      v-else
+      ref="list"
+      class="lyric-list"
+      :style="listStyle"
+    >
       <div
         ref="item"
         class="lyric-item"
@@ -35,23 +40,29 @@ export default {
       default () {
         return 0;
       }
-    }
+    },
+    id: String
   },
   data () {
     return {
       curIdx: -1,
-      itemHeight: 0
+      itemHeight: 0,
+      requestId: null,
+      timer: null
     }
   },
-  methods: {
-    // 切换
-    switchLrc () {
+  computed: {
+    dataIdx () {
       let current = this.currentTime * 1000,
           lyric = this.lyric,
           len = lyric.length;
 
-      let idx;
+      let idx = 0;
       lyric.forEach(({start, end}, index) => {
+        // if (current < lyric[0].start) {
+        //   this.curIdx = 0;
+        //   return;
+        // }
         if (current >= lyric[len -1].start) {
           idx = len -1;
         } else {
@@ -60,37 +71,57 @@ export default {
           }
         }
       });
-      this.curIdx = idx;
+      // console.log(idx);
+      return idx;
     },
-
-    handleAnimation () {
-      console.log(this.curIdx);
-      if (!this.itemHeight) {
-        this.itemHeight = utils.getStyles(this.$refs.item[0], 'height');
+    listStyle () {
+      return {
+        transform: `translateY(-${this.itemHeight * (this.curIdx <= 0 ? 0 : this.curIdx - 1)}px)`
       }
-
-      if (!isNaN(Number(this.curIdx))) {
-        this.$refs.list.style.transform = `translateY(-${this.itemHeight * (this.curIdx - 1)}px)`
-      }
-    },
-
-    restore () {
-      // console.log(this.$refs.list)
-      // this.$refs.list.style.transform = `translateY(0px)`
     }
   },
-  watch: {
-    currentTime (newTime) {
-      if (this.lyric.length > 0) {
-        this.switchLrc();
-      }
+  methods: {
+    // 切换
+    switchLrc () {
+      this.timer = setTimeout(() => {
+        let current = this.currentTime * 1000,
+            lyric = this.lyric,
+            len = lyric.length;
+
+        let idx = 0;
+        lyric.forEach(({start, end}, index) => {
+          // if (current < lyric[0].start) {
+          //   this.curIdx = 0;
+          //   return;
+          // }
+          if (current >= lyric[len -1].start) {
+            idx = len -1;
+          } else {
+            if (current >= start && current < end) {
+              idx = index;
+            }
+          }
+        });
+        this.curIdx = idx;
+        if (this.$refs.list) {
+          this.itemHeight = utils.getStyles(this.$refs.item[0], 'height');
+        }
+        this.requestId = requestAnimationFrame(this.switchLrc);
+      }, 500);
     },
-    curIdx () {
-      this.handleAnimation();
+
+    cancelAnimation () {
+      cancelAnimationFrame(this.requestId);
+      this.requestId = null;
+      clearTimeout(this.timer);
+      this.timer = null;
     },
-    lyric () {
-      this.restore();
-    }
+  },
+  mounted () {
+    this.switchLrc();
+  },
+  destroyed () {
+    this.cancelAnimation();
   }
 }
 </script>
@@ -115,12 +146,13 @@ export default {
 
   .lyric-list {
     transition: all .3s;
+    height: 1.6rem;
 
     .lyric-item {
       width: 100%;
       line-height: .32rem;
       text-align: center;
-      font-size: $fs14;
+      font-size: $fs12;
 
       &.active {
         color: #ff9c82;

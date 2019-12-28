@@ -29,9 +29,15 @@ export default {
       document.addEventListener('touchmove', _handleDrag, false);
       document.addEventListener('touchend', _handleDragEnd, false);
 
-      function _handleDragEnd () {
+      function _handleDragEnd (ev) {
         _self.$emit('changeActive', false);
-        _self.audioPlayer.play();
+        
+        let e = ev || window.event,
+            x = e.changedTouches[0].pageX;
+
+        _self.$emit('changePosition', x, true);
+
+
         document.removeEventListener('touchmove', _handleDrag, false);
         document.removeEventListener('touchend', _handleDragEnd, false);
       }

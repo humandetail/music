@@ -1,19 +1,23 @@
 <template>
   <div class="progress-bar">
     <span class="time current">{{ cTime }}</span>
-    <div class="progress" @click.stop="handleBarClick">
+    <div class="progress"
+      @click.stop="handleBarClick"
+    >
       <div class="bar" ref="bar">
         <div class="buffer" :style="{width: bufferedWidth}"></div>
-        <div class="current" :style="{width: progressPercent}"></div>
+        <div class="current" :style="controlBtnIsActive ? {} : {width: progressPercent}" ref="currentBar"></div>
       </div>
       <div
+        ref="controlBtn"
         class="control-btn"
-        :style="{left: progressPercent}"
+        :style="controlBtnIsActive ? {} : {left: progressPercent}"
       >
         <drag-point
           :active="controlBtnIsActive"
           @changeActive="changePointActive"
           @changePosition="changePosition"
+          @click.native="handleBarClick"
         ></drag-point>
       </div>
     </div>
@@ -62,10 +66,10 @@ export default {
 
   computed: {
     cTime () {
-      return utils.formatTime(this.currentTime);
+      return utils.formatTime(Math.ceil(this.currentTime));
     },
     tTime () {
-      return utils.formatTime(this.totalTime);
+      return utils.formatTime(Math.ceil(this.totalTime));
     },
 
     bufferedWidth () {
@@ -73,7 +77,6 @@ export default {
     },
     
     progressPercent () {
-      // console.log(this.currentTime)
       return this.currentTime / this.totalTime * 100 + '%';
     }
   },
@@ -98,7 +101,15 @@ export default {
         this.progressLeft = utils.getElementDocPosition(this.$refs.bar).left;
       }
       let percent = (x - this.progressLeft) / this.progressWidth;
-      this.$emit('changeProgress', percent > 1 ? 1 : (percent < 0 ? 0 : percent), field);
+
+      percent = percent > 1 ? 1 : (percent < 0 ? 0 : percent)
+
+      this.$refs.currentBar.style.width = percent * 100 + '%';
+      this.$refs.controlBtn.style.left = percent * 100 + '%';
+
+      if (field === 'click') {
+        this.$emit('changeProgress', percent);
+      }
     },
 
     
@@ -106,8 +117,8 @@ export default {
       this.controlBtnIsActive = isActive;
     },
 
-    changePosition (x) {
-      this.setProgress(x);
+    changePosition (x, isEnd) {
+      this.setProgress(x, isEnd ? 'click' : '');
     }
   },
 }

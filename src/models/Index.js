@@ -28,9 +28,10 @@ class IndexModel extends HTTP {
         // 欧美:96
         // 日本:8
         // 韩国:16
-        params: {
-          type
-        },
+        // params: {
+        //   type,
+        //   limit: 10
+        // },
         success: resolve,
         error: reject
       });

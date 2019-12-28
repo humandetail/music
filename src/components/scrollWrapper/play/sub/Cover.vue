@@ -45,6 +45,9 @@ export default {
       this.requestId = null;
     }
   },
+  beforeDestroy () {
+    this.cancelAnimation();
+  },
   watch: {
     playing (newVal) {
       if (newVal) {
